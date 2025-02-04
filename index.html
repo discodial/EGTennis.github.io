@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Confirmation</title>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Practice 2/8/25 - 3PM</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Confirm</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody id="attendanceBody">
+        </tbody>
+    </table>
+    <div style="text-align: center;">
+        <input type="text" id="nameInput" placeholder="Enter your name">
+        <button onclick="addEntry()">Add</button>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", loadEntries);
+
+        function addEntry() {
+            let name = document.getElementById("nameInput").value.trim();
+            if (name === "") return;
+            
+            let tableBody = document.getElementById("attendanceBody");
+            let row = document.createElement("tr");
+            
+            let nameCell = document.createElement("td");
+            nameCell.textContent = name;
+            
+            let confirmCell = document.createElement("td");
+            let button = document.createElement("button");
+            button.textContent = "Confirm";
+            button.onclick = function() {
+                this.textContent = "Confirmed";
+                this.disabled = true;
+                saveEntries();
+            };
+            confirmCell.appendChild(button);
+            
+            let removeCell = document.createElement("td");
+            let removeButton = document.createElement("button");
+            removeButton.textContent = "Remove";
+            removeButton.onclick = function() {
+                tableBody.removeChild(row);
+                saveEntries();
+            };
+            removeCell.appendChild(removeButton);
+            
+            row.appendChild(nameCell);
+            row.appendChild(confirmCell);
+            row.appendChild(removeCell);
+            tableBody.appendChild(row);
+            
+            document.getElementById("nameInput").value = "";
+            saveEntries();
+        }
+
+        function saveEntries() {
+            let data = [];
+            document.querySelectorAll("#attendanceBody tr").forEach(row => {
+                let name = row.cells[0].textContent;
+                let confirmed = row.cells[1].firstChild.disabled;
+                data.push({ name, confirmed });
+            });
+            localStorage.setItem("attendance", JSON.stringify(data));
+        }
+
+        function loadEntries() {
+            let data = JSON.parse(localStorage.getItem("attendance")) || [];
+            let tableBody = document.getElementById("attendanceBody");
+            data.forEach(entry => {
+                let row = document.createElement("tr");
+                
+                let nameCell = document.createElement("td");
+                nameCell.textContent = entry.name;
+                
+                let confirmCell = document.createElement("td");
+                let button = document.createElement("button");
+                button.textContent = entry.confirmed ? "Confirmed" : "Confirm";
+                button.disabled = entry.confirmed;
+                button.onclick = function() {
+                    this.textContent = "Confirmed";
+                    this.disabled = true;
+                    saveEntries();
+                };
+                confirmCell.appendChild(button);
+                
+                let removeCell = document.createElement("td");
+                let removeButton = document.createElement("button");
+                removeButton.textContent = "Remove";
+                removeButton.onclick = function() {
+                    tableBody.removeChild(row);
+                    saveEntries();
+                };
+                removeCell.appendChild(removeButton);
+                
+                row.appendChild(nameCell);
+                row.appendChild(confirmCell);
+                row.appendChild(removeCell);
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
